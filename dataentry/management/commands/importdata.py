@@ -8,19 +8,19 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('path', type=str, help='Path to csv file')
+        parser.add_argument('model', type=str, help='Model name')
 
     def handle(self, *args, **kwargs):
         file_path = kwargs['path']
-        print(file_path)
+        model_name = kwargs['model']
 
-        with open(file_path, 'r') as f:
-            reader = csv.DictReader(f)
-
+        model = globals()[model_name]
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
             for row in reader:
-                existing_student = Student.objects.filter(
-                    roll_no=row['roll_no']).exists()
-                if not existing_student:
-                    Student.objects.create(**row)
+                existing_data = model.objects.filter(**row).exists()
+                if not existing_data:
+                    model.objects.create(**row)
                 else:
                     raise ValueError('Data already exists')
 
