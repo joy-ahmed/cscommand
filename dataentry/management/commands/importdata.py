@@ -1,5 +1,5 @@
 from django.apps import apps
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 import csv
 
 # from dataentry.models import *
@@ -17,12 +17,15 @@ class Command(BaseCommand):
         model_name = kwargs['model']
 
         # model = globals()[model_name]
+        model = None
         for app_config in apps.get_app_configs():
             try:
                 model = app_config.get_model(model_name)
                 break
             except LookupError:
                 continue
+        if not model:
+            raise CommandError(f"Model '{model_name}' not found")
 
         with open(file_path, 'r') as file:
             reader = csv.DictReader(file)
