@@ -1,6 +1,8 @@
+from django.apps import apps
 from django.core.management.base import BaseCommand
 import csv
-from dataentry.models import *
+
+# from dataentry.models import *
 
 
 class Command(BaseCommand):
@@ -14,7 +16,14 @@ class Command(BaseCommand):
         file_path = kwargs['path']
         model_name = kwargs['model']
 
-        model = globals()[model_name]
+        # model = globals()[model_name]
+        for app_config in apps.get_app_configs():
+            try:
+                model = app_config.get_model(model_name)
+                break
+            except LookupError:
+                continue
+
         with open(file_path, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
