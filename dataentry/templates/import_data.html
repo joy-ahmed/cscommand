@@ -1,0 +1,153 @@
+{% extends "base_template.html" %}
+<title>{% block title %}Import data{% endblock title %}</title>
+
+{% block main %}
+
+<div class="h-screen w-full flex flex-col items-center py-16">
+  <h4 class="mb-16 text-2xl font-bold text-center">
+    Import csv data to database
+  </h4>
+  <form
+    action="{% url 'import-data' %}"
+    method="post"
+    enctype="multipart/form-data"
+  >
+    {% csrf_token %}
+    <div
+      class="w-[400px] relative border-2 border-gray-300 border-dashed rounded-lg p-6"
+      id="dropzone"
+    >
+      <input
+        type="file"
+        accept=".csv, .xlsx, .xls"
+        class="absolute inset-0 w-full h-full opacity-0 z-50"
+        id="file-upload"
+        name="file"
+        onchange="displayPreview(this.files[0])"
+        required
+      />
+      <div class="text-center">
+        <img
+          class="mx-auto h-12 w-12 opacity-75"
+          src="https://www.svgrepo.com/show/532046/cloud-up-arrow.svg"
+          alt=""
+        />
+
+        <h3 class="mt-2 text-sm font-medium text-gray-900">
+          <label for="file-upload" class="relative cursor-pointer">
+            <span>Drag and drop</span>
+            <span class="text-indigo-600"> or browse</span>
+            <span>to upload</span>
+          </label>
+        </h3>
+        <p class="mt-1 text-xs text-gray-500">CSV, XLSX, XLS up to 10MB</p>
+      </div>
+    </div>
+
+    {% comment %} file preview {% endcomment %}
+    <div>
+      <div id="file-info" class="hidden">
+        <p>
+          <span id="preview"></span>
+          <button
+            id="remove-btn"
+            class="ml-2 px-2 py-1 rounded-full bg-gray-300 hover:bg-gray-400"
+          >
+            <!-- Cross (X) icon for remove -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              width="20"
+              height="20"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </p>
+      </div>
+    </div>
+
+    {% comment %} dropdown select {% endcomment %}
+
+    <div class="mt-4">
+      <label for="select-model"> Select database table </label>
+      <select
+        name="model"
+        id="select-model"
+        class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+      >
+        <option value="" disabled selected>--------</option>
+        {% for model in models %}
+        <option value="{{ model }}">{{ model }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button
+      type="submit"
+      class="w-full mt-3 text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+    >
+      Import
+    </button>
+  </form>
+</div>
+
+<script>
+  var dropzone = document.getElementById("dropzone");
+  var fileInfo = document.getElementById("file-info");
+  var removeBtn = document.getElementById("remove-btn");
+  var input = document.getElementById("file-upload");
+
+  dropzone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropzone.classList.add("border-indigo-600");
+  });
+
+  dropzone.addEventListener("dragleave", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("border-indigo-600");
+  });
+
+  input.addEventListener("change", (e) => {
+    var file = e.target.files[0];
+    displayPreview(file);
+  });
+
+  dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("border-indigo-600");
+    var file = e.dataTransfer.files[0];
+    displayPreview(file);
+    input.files = e.dataTransfer.files;
+  });
+
+  removeBtn.addEventListener("click", () => {
+    clearPreview();
+  });
+
+  function displayPreview(file) {
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      var preview = document.getElementById("preview");
+      preview.textContent = file.name;
+      fileInfo.classList.remove("hidden");
+    };
+  }
+
+  function clearPreview() {
+    var preview = document.getElementById("preview");
+    preview.textContent = "";
+    fileInfo.classList.add("hidden");
+    input.value = ""; // Clear the input value
+  }
+</script>
+
+{% endblock main %}
