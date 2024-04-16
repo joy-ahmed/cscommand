@@ -7,6 +7,25 @@
   <h4 class="mb-16 text-2xl font-bold text-center">
     Import csv data to database
   </h4>
+  {% if messages %}
+  <div class="mb-16">
+    {% for message in messages %}
+    <div
+      class="rounded-lg shadow-md {% if message.tags == 'error' %}bg-red-100 text-red-500{% elif message.tags == 'success' %}bg-green-100 text-green-500{% else %}bg-gray-100 text-gray-800{% endif %} py-4 px-5 relative"
+      role="alert"
+    >
+      <div class="px-4">{{ message }}</div>
+      <button
+        type="button"
+        class="absolute top-0 right-0 mr-1 mt-2"
+        onclick="this.parentElement.remove()"
+      >
+        <span class="text-xl" aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
   <form
     action="{% url 'import-data' %}"
     method="post"
@@ -81,6 +100,7 @@
       <select
         name="model"
         id="select-model"
+        required
         class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
       >
         <option value="" disabled selected>--------</option>

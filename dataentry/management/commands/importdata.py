@@ -2,6 +2,8 @@ from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError
 import csv
 
+from django.db import DataError
+
 # from dataentry.models import *
 
 
@@ -27,8 +29,16 @@ class Command(BaseCommand):
         if not model:
             raise CommandError(f"Model '{model_name}' not found")
 
+        model_fields = [
+            field.name for field in model._meta.fields if field.name != 'id']
+
         with open(file_path, 'r') as file:
             reader = csv.DictReader(file)
+            csv_header = reader.fieldnames
+            # compare csv header with model fields
+            if csv_header != model_fields:
+                raise DataError('CSV header does not match model fields')
+
             for row in reader:
                 existing_data = model.objects.filter(**row).exists()
                 if not existing_data:
